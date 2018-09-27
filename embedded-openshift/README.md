@@ -1,70 +1,78 @@
-Example of using Embedded Datagrid on OpenShift
+Embedding Red Hat Data Grid on OpenShift
 ==================================================================
 Author: Katia Aresti
 Level: Intermediate
 Technologies: Infinispan, OpenShift
-Summary: The `embedded-openshift` quickstart demonstrates how to deploy an application that uses datagrid in
-embedded mode
-Target Product: JDG
-Product Versions: JDG 7.3
+Summary: Learn how to deploy an application on OpenShift that embeds Red Hat Data Grid.
+Target Product: Red Hat Data Grid
+Product Versions: Red Hat Data Grid 7.3
 
-What is it?
+About This Quickstart
 -----------
+This quickstart includes a containerized application that demonstrates how to use Red Hat Data Grid in Library mode on OpenShift.
 
-The `embedded-openshift` quickstart demonstrates how to use and deploy applications using datagrid in embedded mode.
-
-Prerequisites
--------------
-
-In order to run this project one needs to have an access to local OpenShift installation.
-
-You can use local OpenShift all-in-one cluster. To prepare you local OpenShift cluster follow [the documentation](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md).
-
-Maven and [Docker](https://www.docker.com/) daemon running in the background.
-
-System requirements
+System Requirements
 -------------------
 
-All you need to build this project is Java 8.0 (Java SDK 1.8) or better, Maven 3.0 or better and OpenShift 3 client.
+* Java 8.0 (Java SDK 1.8) or later.
+* Maven 3.0 or later. You must also [configure Maven](https://github.com/jboss-developer/jboss-developer-shared-resources/blob/master/guides/CONFIGURE_MAVEN.md#configure-maven-to-build-and-deploy-the-quickstarts).
+* OpenShift 3 client.
+* A local OpenShift installation. You can use the OpenShift [all-in-one cluster](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md).
+* A version of Docker that is compatible with your local OpenShift installation.
 
-Configure Maven
----------------
+Configuring the Service Account for KUBE_PING
+---------------------------------------------
+The [KUBE_PING](https://github.com/jgroups-extras/jgroups-kubernetes) discovery protocol must have view access for all pods in your project namespace.
 
-If you have not yet done so, you must [Configure Maven](https://github.com/jboss-developer/jboss-developer-shared-resources/blob/master/guides/CONFIGURE_MAVEN.md#configure-maven-to-build-and-deploy-the-quickstarts) before testing the quickstarts.
+To configure the service account, do the following:
 
-Configuring Service Account for KUBE_PING
------------------------------------------
-Since https://github.com/jgroups-extras/jgroups-kubernetes[KUBE_PING] Discovery Protocol requires viewing all Pods in the OpenShift Project, you need to add additional privileges to the OpenShift:
+1. Start the Docker daemon if it is not already running.
+2. Start your local OpenShift cluster if it is not already running.
+3. Log in as the developer user.
 
+  ```bash
+  $ oc login -u developer -p developer
+  ```
 
-      oc cluster up
-      oc login -u system:admin
-      oc policy add-role-to-user view system:serviceaccount:myproject:default -n myproject
+4. Add the view role to the default service account.
 
+  ```bash
+  $ oc policy add-role-to-user view system:serviceaccount:$(oc project -q):default -n $(oc project -q)
+  ```
 
-Switch to a normal user
------------------------
-After the OpenShift is running, you need to login as a `developer`. That's the standard role you should always be using:
+Building and Deploying the Quickstart Application
+-------------------------------------------------
+To build the quickstart application, do the following:
 
-      oc login -u developer -p developer
+1. Open a command prompt and navigate to the root directory of this repository.
+2. Build the application `JAR` file.
 
-Build the Quickstart
---------------------
+  ```bash
+  $ mvn clean package
+  ```
 
-Type this command to build the quickstart:
+  This command creates `target/jboss-embedded-openshift-quickstart.jar`. The `target/` directory also contains a Dockerfile and other deployment artifacts. The `target/classes/META-INF/fabric8` directory contains Kubernetes and OpenShift deployment templates.
 
-      mvn clean package
+3. Deploy the quickstart application to OpenShift.
 
-Note that `target/` directory contains additional directories like `docker` (with generated Dockerfile) and `classes/META-INF/fabric8` with Kubernetes and OpenShift deployment templates.
+  ```bash
+  $ mvn fabric8:run
+  ```
 
-TIP: If the Docker Daemon is down, the build will omit processing Dockerfiles. Use `docker` profile to turn it on manually.
+  This command uses the OpenShift source-to-image build process to create an image stream, deployment configuration, and pod named `jboss-embedded-openshift-quickstart`.
 
-Deploying this tutorial in OpenShift
-------------------------------------
-This is handles automatically by Fabric8 maven plugin, just invoke:
+Working with the Quickstart Application
+---------------------------------------
+After you build and deploy the quickstart application, do the following to evaluate it:
 
-        mvn fabric8:run
+1. Get the status for the quickstart application.
 
-Viewing and scaling
--------------------
-Everything should be up and running at this point. Now login into the [OpenShift web console](https://127.0.0.1:8443/) and scale the application up or down.
+  ```bash
+  $ oc status
+  ```
+
+2. Scale the quickstart application up or down.
+
+  ```bash
+  $ oc scale dp jboss-embedded-openshift-quickstart --replicas=<number>
+  ```
