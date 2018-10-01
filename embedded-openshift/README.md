@@ -20,11 +20,9 @@ System Requirements
 * A local OpenShift installation. You can use the OpenShift [all-in-one cluster](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md).
 * A version of Docker that is compatible with your local OpenShift installation.
 
-Configuring the Service Account for KUBE_PING
----------------------------------------------
-The [KUBE_PING](https://github.com/jgroups-extras/jgroups-kubernetes) discovery protocol must have view access for all pods in your project namespace.
-
-To configure the service account, do the following:
+Setting Up the OpenShift Environment
+------------------------------------
+To set up your OpenShift environment, do the following:
 
 1. Start the Docker daemon if it is not already running.
 2. Start your local OpenShift cluster if it is not already running.
@@ -34,7 +32,9 @@ To configure the service account, do the following:
   $ oc login -u developer -p developer
   ```
 
-4. Add the view role to the default service account.
+4. Ensure the `myproject` namespace is available and switch to it if necessary. This quickstart is configured to use the `myproject` namespace. If you use a different project, you must specify the namespace with the `fabric8.namespace` parameter in `pom.xml`.
+
+5. Add the view role to the default service account. The [KUBE_PING](https://github.com/jgroups-extras/jgroups-kubernetes) discovery protocol must have view access for all pods in your project namespace.
 
   ```bash
   $ oc policy add-role-to-user view system:serviceaccount:$(oc project -q):default -n $(oc project -q)
